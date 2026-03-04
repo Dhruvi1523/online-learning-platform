@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "IMLlkPIfqzPmAXNjiwmRJlftfkhmopAE",
+    "password": "",
     "database": "railway",
     "host": "tramway.proxy.rlwy.net",
     "dialect": "mysql",
@@ -16,7 +16,7 @@
   },
   "test": {
      "username": "root",
-    "password": "IMLlkPIfqzPmAXNjiwmRJlftfkhmopAE",
+    "password": "",
     "database": "railway",
     "host": "mysql.railway.internal",
     "dialect": "mysql",
