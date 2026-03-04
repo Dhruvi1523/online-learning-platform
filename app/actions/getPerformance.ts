@@ -1,0 +1,60 @@
+import db from "@/models";
+import { Course, Purchase } from "@/lib/types";
+
+type PurchaseWithCourse = Purchase & { course: Course };
+
+const groupByCourse = (purchases: PurchaseWithCourse[]) => {
+  const grouped: { [courseTitle: string]: { total: number; count: number } } =
+    {};
+
+  purchases.forEach((purchase) => {
+    const courseTitle = purchase.course.title;
+    if (!grouped[courseTitle]) {
+      grouped[courseTitle] = { total: 0, count: 0 };
+    }
+    grouped[courseTitle].total += purchase.course.price!;
+    grouped[courseTitle].count += 1;
+  });
+
+  return grouped;
+};
+
+export const getPerformance = async (userId: string) => {
+  try {
+    const purchases = await db.purchase.findAll({
+      include: [
+        {
+          association: "course",
+          where: { instructorId: userId },
+        },
+      ],
+    });
+
+    // cast to include course data so our helper can group properly
+    const groupedEarnings = groupByCourse(purchases as unknown as PurchaseWithCourse[]); 
+    
+    const data = Object.entries(groupedEarnings).map(
+      ([courseTitle, { total, count }]) => ({
+        name: courseTitle,
+        total,
+        count,
+      })
+    );
+
+    const totalRevenue = data.reduce((acc, current) => acc + current.total, 0);
+    const totalSales = purchases.length
+
+    return {
+      data,
+      totalRevenue,
+      totalSales,
+    };
+  } catch (err) {
+    console.log("[getPerformance]", err);
+    return {
+      data: [],
+      totalRevenue: 0,
+      totalSales: 0,
+    };
+  }
+};
