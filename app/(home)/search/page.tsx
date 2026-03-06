@@ -1,27 +1,35 @@
 import CourseCard from "@/components/courses/CourseCard";
-import { db } from "@/models"
-import { Op } from "sequelize";
+import { db } from "@/models";
+import { Op, WhereOptions } from "sequelize";
 
-const SearchPage = async ({ searchParams }: { searchParams: { query: string }}) => {
-  const queryText = searchParams.query || ''
+const SearchPage = async ({
+  searchParams,
+}: {
+  searchParams: { query?: string };
+}) => {
+  const queryText = (searchParams.query || "").trim();
+
+  const whereClause: WhereOptions = {
+    isPublished: true,
+  };
+
+  if (queryText) {
+    whereClause[Op.or] = [
+      { title: { [Op.like]: `%${queryText}%` } },
+      { "$category.name$": { [Op.like]: `%${queryText}%` } },
+      { "$subCategory.name$": { [Op.like]: `%${queryText}%` } },
+    ];
+  }
+
   const courses = await db.course.findAll({
-    where: {
-      isPublished: true,
-      [Op.or]: [
-        { title: { [Op.iLike]: `%${queryText}%` } },
-        { '$category.name$': { [Op.iLike]: `%${queryText}%` } },
-        { '$subCategory.name$': { [Op.iLike]: `%${queryText}%` } },
-      ],
-    },
+    where: whereClause,
     include: [
       { association: "category" },
       { association: "subCategory" },
       { association: "level" },
       {
         association: "sections",
-        where: {
-          isPublished: true,
-        },
+        where: { isPublished: true },
         required: false,
       },
     ],
@@ -30,14 +38,17 @@ const SearchPage = async ({ searchParams }: { searchParams: { query: string }}) 
 
   return (
     <div className="px-4 py-6 md:px-10 xl:px-16">
-      <p className="text-lg md:text-2xl font-semibold mb-10">Recommended courses for {queryText}</p>
-      <div className="flex gap-4 flex-wrap">
-        {courses.map((course: typeof courses[0]) => (
+      <p className="mb-10 text-lg font-semibold md:text-2xl">
+        Recommended courses for {queryText || "all courses"}
+      </p>
+
+      <div className="flex flex-wrap gap-4">
+        {courses.map((course: typeof courses[number]) => (
           <CourseCard key={course.id} course={course} />
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SearchPage
+export default SearchPage;
