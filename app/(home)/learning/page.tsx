@@ -37,7 +37,7 @@ const LearningPage = async () => {
       </h1>
       <div className="flex flex-wrap gap-7 mt-7">
         {purchasedCourses.map((purchase: typeof purchasedCourses[0]) => (
-          <CourseCard key={purchase.course.id} course={purchase.course} />
+          <CourseCard key={purchase.courseId} course={purchase.course} />
         ))}
       </div>
     </div>
