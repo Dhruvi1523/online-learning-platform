@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import Mux from "@mux/mux-node";
 
-let video: any = null;
+let video: Mux["video"] | null = null;
 
 if (process.env.MUX_TOKEN_ID && process.env.MUX_TOKEN_SECRET) {
   video = new Mux({
@@ -12,10 +12,10 @@ if (process.env.MUX_TOKEN_ID && process.env.MUX_TOKEN_SECRET) {
   }).video;
 }
 
-export const PATCH = async (
+export async function PATCH(
   req: NextRequest,
-  { params }: { params: { courseId: string } }
-) => {
+  { params }: { params: Promise<{ courseId: string }> }
+) {
   try {
     const { userId } = await auth();
     const { courseId } = await params;
@@ -29,7 +29,6 @@ export const PATCH = async (
       return new NextResponse("Missing courseId", { status: 400 });
     }
 
-    // ✅ Sequelize update: (values, options)
     const [updatedCount] = await db.course.update(values, {
       where: { id: courseId, instructorId: userId },
     });
@@ -38,22 +37,23 @@ export const PATCH = async (
       return new NextResponse("Course not found", { status: 404 });
     }
 
-    // Fetch updated row and return plain JSON
     const updatedCourse = await db.course.findOne({
       where: { id: courseId, instructorId: userId },
     });
 
-    return NextResponse.json(updatedCourse?.get({ plain: true }), { status: 200 });
+    return NextResponse.json(updatedCourse?.get({ plain: true }), {
+      status: 200,
+    });
   } catch (err) {
     console.error("[courseId_PATCH]", err);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
-};
+}
 
-export const DELETE = async (
+export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { courseId: string } }
-) => {
+  { params }: { params: Promise<{ courseId: string }> }
+) {
   try {
     const { userId } = await auth();
     const { courseId } = await params;
@@ -81,9 +81,9 @@ export const DELETE = async (
       return new NextResponse("Course not found", { status: 404 });
     }
 
-    // Delete Mux assets if configured
     if (video) {
       const sections = (course as any).sections ?? [];
+
       for (const section of sections) {
         const assetId = section?.muxData?.assetId;
         if (assetId) {
@@ -101,4 +101,4 @@ export const DELETE = async (
     console.error("[courseId_DELETE]", err);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
-};
+}

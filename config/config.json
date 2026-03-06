@@ -1,27 +1,7 @@
 {
   "development": {
-    "username": "root",
-    "password": "IMLlkPIfqzPmAXNjiwmRJlftfkhmopAE",
-    "database": "railway",
-    "host": "tramway.proxy.rlwy.net",
+    "use_env_variable": "DATABASE_URL",
     "dialect": "mysql",
-    "port": 16931,
-    "ssl": true,
-    "dialectOptions": {
-      "ssl": {
-        "require": true,
-        "rejectUnauthorized": false
-      }
-    }
-  },
-  "test": {
-     "username": "root",
-    "password": "IMLlkPIfqzPmAXNjiwmRJlftfkhmopAE",
-    "database": "railway",
-    "host": "mysql.railway.internal",
-    "dialect": "mysql",
-    "port": 3306,
-    "ssl": true,
     "dialectOptions": {
       "ssl": {
         "require": true,
@@ -40,4 +20,3 @@
     }
   }
 }
-
