@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 
 const LearningPage = async () => {
-  const { userId } = auth()
+  const { userId } =  await auth()
 
   if (!userId) {
     return redirect('/sign-in')

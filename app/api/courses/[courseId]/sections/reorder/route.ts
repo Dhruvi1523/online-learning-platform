@@ -7,7 +7,7 @@ export const PUT = async (
   { params }: { params: Promise<{ courseId: string }> }
 ) => {
   try {
-    const { userId } = auth();
+    const { userId } =await auth();
     const { courseId } = await params;
 
     if (!userId) {
