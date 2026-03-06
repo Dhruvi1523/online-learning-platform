@@ -7,7 +7,7 @@ export const POST = async (
   { params }: { params: Promise<{ courseId: string; sectionId: string }> }
 ) => {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     const { courseId, sectionId } = await params;
 
     if (!userId) {

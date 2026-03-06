@@ -2,13 +2,13 @@ import { db } from "@/models";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
-export const POST = async (
+export async function POST(
   req: NextRequest,
-  { params }: { params: { courseId: string; sectionId: string } }
-) => {
+  { params }: { params: Promise<{ courseId: string; sectionId: string }> }
+) {
   try {
     const { userId } = await auth();
-    const { courseId, sectionId } = await params; // params is a plain object, no await
+    const { courseId, sectionId } = await params;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -44,7 +44,13 @@ export const POST = async (
       raw: true,
     });
 
-    if (!section || !muxData || !section.title || !section.description || !section.videoUrl) {
+    if (
+      !section ||
+      !muxData ||
+      !section.title ||
+      !section.description ||
+      !section.videoUrl
+    ) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
@@ -53,7 +59,6 @@ export const POST = async (
       { where: { id: sectionId, courseId } }
     );
 
-    // fetch updated section
     const publishedSection = await db.section.findOne({
       where: { id: sectionId, courseId },
       raw: true,
@@ -61,7 +66,7 @@ export const POST = async (
 
     return NextResponse.json(publishedSection, { status: 200 });
   } catch (err) {
-    console.log("[section_publish_POST]", err);
+    console.error("[section_publish_POST]", err);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
-};
+}
