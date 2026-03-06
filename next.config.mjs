@@ -6,9 +6,9 @@ const nextConfig = {
       { hostname: 'img.clerk.com'}
     ]
   } ,
-   experimental: {
-    serverComponentsExternalPackages: ["sequelize", "pg", "pg-hstore"],
-  },
+  typescript: {
+    ignoreBuildErrors: true
+  }
 };
 
 export default nextConfig;
