@@ -1,32 +1,33 @@
 import CourseCard from "@/components/courses/CourseCard";
 import { db } from "@/models";
-import { Op, WhereOptions } from "sequelize";
+import { Op, where, col } from "sequelize";
 
 const SearchPage = async ({
   searchParams,
 }: {
-  searchParams: { query?: string };
+  searchParams: Promise<{ query?: string }>;
 }) => {
-  const queryText = (searchParams.query || "").trim();
+  const params = await searchParams;
+  const queryText = (params.query || "").trim();
 
-  const whereClause: WhereOptions = {
+  const whereClause: any = {
     isPublished: true,
   };
 
   if (queryText) {
     whereClause[Op.or] = [
       { title: { [Op.like]: `%${queryText}%` } },
-      { "$category.name$": { [Op.like]: `%${queryText}%` } },
-      { "$subCategory.name$": { [Op.like]: `%${queryText}%` } },
+      where(col("category.name"), { [Op.like]: `%${queryText}%` }),
+      where(col("subCategory.name"), { [Op.like]: `%${queryText}%` }),
     ];
   }
 
   const courses = await db.course.findAll({
     where: whereClause,
     include: [
-      { association: "category" },
-      { association: "subCategory" },
-      { association: "level" },
+      { association: "category", required: false },
+      { association: "subCategory", required: false },
+      { association: "level", required: false },
       {
         association: "sections",
         where: { isPublished: true },
@@ -34,6 +35,8 @@ const SearchPage = async ({
       },
     ],
     order: [["createdAt", "DESC"]],
+    distinct: true,
+    subQuery: false,
   });
 
   return (

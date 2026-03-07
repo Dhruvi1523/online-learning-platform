@@ -11,9 +11,6 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 
@@ -29,25 +26,22 @@ const Topbar = () => {
 
   const sidebarRoutes = [
     { label: "Courses", path: "/instructor/courses" },
-    {
-      label: "Performance",
-      path: "/instructor/performance",
-    },
+    { label: "Performance", path: "/instructor/performance" },
   ];
 
   const [searchInput, setSearchInput] = useState("");
-
   const handleSearch = () => {
-    if (searchInput.trim() !== "") {
-      router.push(`/search?query=${searchInput}`);
-    }
+    const trimmed = searchInput.trim();
+    if (!trimmed) return;
+
+    router.push(`/search?query=${encodeURIComponent(trimmed)}`);
     setSearchInput("");
   };
 
   return (
     <div className="flex justify-between items-center p-4">
       <Link href="/">
-        <Image src="/logo.png" height={100} width={200} alt="logo" />
+        <Image src="/logo.png" height={130} width={130} alt="logo" />
       </Link>
 
       <div className="max-md:hidden w-[400px] rounded-full flex">
@@ -56,6 +50,9 @@ const Topbar = () => {
           placeholder="Search for courses"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSearch();
+          }}
         />
         <button
           className="bg-[#FDAB04] rounded-r-full border-none outline-none cursor-pointer px-4 py-3 hover:bg-[#FDAB04]/80"
@@ -96,7 +93,7 @@ const Topbar = () => {
                   </Link>
                 ))}
               </div>
-              
+
               {pathName.startsWith("/instructor") && (
                 <div className="flex flex-col gap-4">
                   {sidebarRoutes.map((route) => (
